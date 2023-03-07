@@ -17,6 +17,14 @@ codons = {"UUU":"Phe", "UUC":"Phe", "UUA":"Leu", "UUG":"Leu",
           "GGU":"Gly", "GGC":"Gly", "GGA":"Gly", "GGG":"Gly"}
         
 def main():
+    """
+    Reads all five sequences and prints if each codes for normal CFTR 
+
+    Returns
+    -------
+    None.
+
+    """
     sequence_files = ["cftr1.txt", "cftr2.txt", "cftr3.txt", "cftr4.txt", "cftr5.txt"]
     for file in sequence_files:
         if cftr(readFile(file)) == True:
@@ -66,52 +74,56 @@ def writeFile(fileName,text):
         textFile.write(text)
     
 def restrict(dna, seq):
-    '''
-    
+    """
+    This function simulates the actions of a 
+    restriction enzyme. It should accept a 5’ to 3’ dna 
+    and a restriction sequence seq as strings. 
+    It should then return the list of cut fragments.
 
     Parameters
     ----------
     dna : String
-        This is the dna sequence
-    seq : TYPE
-        DESCRIPTION.
+        function accepts a 5' to 3' dna string
+    seq : String
+        recognition sequence
 
     Returns
     -------
-    fragment_list : TYPE
-        DESCRIPTION.
+    fragment_list : list
+        returns the list of cut fragments based on 
+        recognition sequences.
 
-    '''
+    """
     fragment_list = []
-    i = 0
-    start = 0
-    end = 0
-    l = len(seq) // 2
-    char = 0
-    
-    while char < len(dna) - 1:
-        if i != 0 and i < len(seq) and dna[char] != seq[i]:
-            i = 0
-        elif dna[char] == seq[i] and i < len(seq) - 1:
-            i += 1 
-            end += 1
-            char += 1
-        elif i == len(seq) - 1 and seq[i] == dna[char]:
-            i = 0
-            end -= l
-            fragment_list.append(dna[start:end + 1])
-            start = end + 1
-            end += 1
-            char = start
-        elif end + 1 == len(dna) - 1:
-            fragment_list.append(dna[start:len(dna)])
-            char += 1
-        else:
-            end += 1
-            char += 1
+    if len(seq) % 2 != 0:
+        return fragment_list
+    else:
+        while seq in dna:
+            seq_half_len = int(len(seq) / 2)
+            fragment_index = dna.find(seq) + seq_half_len
+            fragment = dna[0:fragment_index]
+            dna = dna[fragment_index:]
+            fragment_list.append(fragment)
+        fragment_list.append(dna)
     return fragment_list
 
 def transcribe(dna):
+    """
+    This function accepts a 5’ to 3’ 
+    sequence as a string and 
+    returns the mRNA sequence
+
+    Parameters
+    ----------
+    dna : string
+        5' to 3' dna sequence
+
+    Returns
+    -------
+    mRNA_seq : string
+        mRNA sequence
+
+    """
     mRNA_seq = ''
     for i in dna:
         if i == 'T':
@@ -121,6 +133,21 @@ def transcribe(dna):
     return mRNA_seq
     
 def translate(mrna):
+    """
+    Accepts an mRNA string and then uses the provided codons 
+    dictionary to return the list translated amino acids.
+
+    Parameters
+    ----------
+    mrna : string
+        mRNA string
+
+    Returns
+    -------
+    translated_seq : list
+        list of translated amino acids
+
+    """
     translated_seq = []
     for i in range(0,len(mrna)-1,3):
         if mrna[i:i+3] in codons:
@@ -128,11 +155,47 @@ def translate(mrna):
     return translated_seq
 
 def aminoAcids(dna):
+    """
+    takes in a DNA se- quence and returns the
+    set of amino acids that it encodes
+
+    Parameters
+    ----------
+    dna : string
+        dna sequence
+
+    Returns
+    -------
+   set of amino acids that this
+   dna sequence encodes
+
+    """
     mrna = transcribe(dna)
     aminoacid_list = translate(mrna)
     return set(aminoacid_list)
     
 def isolate(dna, start, end):
+    """
+    accepts a DNA string with start and end sequences,
+    returns the DNA sequence between the first instance
+    of the start sequence and the end sequence following it
+
+    Parameters
+    ----------
+    dna : string
+        dna sequence
+    start : string
+        start sequence
+    end : string
+        end sequence
+
+    Returns
+    -------
+    returns string in between start and end sequences.
+    returns boolean value if either the start or end
+    sequences can not be found
+
+    """
     if start == end:
         return False
     if start not in dna:
@@ -145,6 +208,22 @@ def isolate(dna, start, end):
         return dna[start_index:end_index]
 
 def cftr(dna):
+    """
+    
+
+    Parameters
+    ----------
+    dna : string
+        dna sequence
+
+    Returns
+    -------
+    bool
+        eturn a boolean value of True if the 
+        given DNA sequence codes for normal CFTR. 
+        Otherwise it should return False
+
+    """
     cftr_found = isolate(dna,'ATTAAAGAAAATATC', 'GGTGTTTCCTATGAT')
     if cftr_found == 'ATCTTT':
         return True
