@@ -111,6 +111,8 @@ def aminoAcids(dna):
     return set(aminoacid_list)
     
 def isolate(dna, start, end):
+    if start == end:
+         return False
     if start not in dna:
         return False
     elif end not in dna:
