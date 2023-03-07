@@ -17,6 +17,12 @@ codons = {"UUU":"Phe", "UUC":"Phe", "UUA":"Leu", "UUG":"Leu",
           "GGU":"Gly", "GGC":"Gly", "GGA":"Gly", "GGG":"Gly"}
         
 def main():
+    sequence_files = ["cftr1.txt", "cftr2.txt", "cftr3.txt", "cftr4.txt", "cftr5.txt"]
+    for file in sequence_files:
+        if cftr(readFile(file)) == True:
+                print( f'Sequence {sequence_files.index(file) + 1} codes for normal CFTR')
+        else:
+                print( f'Sequence {sequence_files.index(file) + 1} codes for abnormal CFTR')
     """
     Write your code here
     """
@@ -59,7 +65,23 @@ def writeFile(fileName,text):
     with open(fileName,'w') as textFile:
         textFile.write(text)
     
-def restrict(dna, seq):    
+def restrict(dna, seq):
+    '''
+    
+
+    Parameters
+    ----------
+    dna : String
+        This is the dna sequence
+    seq : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    fragment_list : TYPE
+        DESCRIPTION.
+
+    '''
     fragment_list = []
     i = 0
     start = 0
@@ -70,11 +92,11 @@ def restrict(dna, seq):
     while char < len(dna) - 1:
         if i != 0 and i < len(seq) and dna[char] != seq[i]:
             i = 0
-        if dna[char] == seq[i] and i < len(seq) - 1:
+        elif dna[char] == seq[i] and i < len(seq) - 1:
             i += 1 
             end += 1
             char += 1
-        elif i == len(seq) - 1:
+        elif i == len(seq) - 1 and seq[i] == dna[char]:
             i = 0
             end -= l
             fragment_list.append(dna[start:end + 1])
@@ -112,7 +134,7 @@ def aminoAcids(dna):
     
 def isolate(dna, start, end):
     if start == end:
-         return False
+        return False
     if start not in dna:
         return False
     elif end not in dna:
@@ -133,12 +155,8 @@ def cftr(dna):
 
  
 if __name__ == "__main__":
-    sequence_files = ['cftr1.txt', 'cftr2.txt', 'cftr3.txt', 'cftr4.txt', 'cftr5.txt']
-    for file in sequence_files:
-        if cftr(readFile(file)) == True:
-            print( f'Sequence {sequence_files.index(file) + 1} codes for normal CFTR')
-        else:
-            print( f'Sequence {sequence_files.index(file) + 1} codes for abnormal CFTR')
+    main()
+        
     
     
     
