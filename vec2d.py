@@ -30,11 +30,12 @@ class Vec2D(Point):
         if isinstance(x,int) and isinstance(y,int):
             self.x = x
             self.y = y
-        else:
-            num1 = Point(x)
-            num2 = Point(y)
-            self.x = int(num2.x) - int(num1.x)
-            self.y = int(num2.y) - int(num1.y)
+        elif isinstance(x,Point) and isinstance(y,Point):
+            self.x = y.x - x.x
+            self.y = y.y - x.y
+        elif isinstance(x,Point):
+            self.x = x.x
+            self.y = x.y
         
     pass
 
