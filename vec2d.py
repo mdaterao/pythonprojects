@@ -27,9 +27,9 @@ class Point:
     
 class Vec2D(Point):
     def __init__(self,x=0,y=0):
-        if isinstance(x,int) and isinstance(y,int):
+        if isinstance(x,(int, float)) and isinstance(y,(int, float)):
             self.x = x
-            self.y = y
+            self.y = y 
         elif isinstance(x,Point) and isinstance(y,Point):
             self.x = y.x - x.x
             self.y = y.y - x.y
@@ -45,13 +45,13 @@ class Vec2D(Point):
         newY = self.y - other.y
         return Vec2D(newX,newY)
     def __mul__(self,other):
-        if isinstance(self,Vec2D) and isinstance(other,Vec2D):
+        if isinstance(other,Vec2D):
             dot_prod = (self.x * other.x) + (self.y * other.y)
             return dot_prod
         elif isinstance(other,Point):
             dot_prod = (self.x * other.x) + (self.y * other.y)
             return dot_prod
-        elif isinstance(other,int):
+        elif isinstance(other,(int,float)):
             newX = self.x * other
             newY = self.y * other
             return Vec2D(newX,newY)
