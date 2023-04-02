@@ -36,10 +36,33 @@ class Vec2D(Point):
         elif isinstance(x,Point):
             self.x = x.x
             self.y = x.y
+    def __add__(self,other):
+        newX = self.x + other.x
+        newY = self.y + other.y
+        return Vec2D(newX,newY)
+    def __sub__(self,other):
+        newX = self.x - other.x
+        newY = self.y - other.y
+        return Vec2D(newX,newY)
+    def __mul__(self,other):
+        if isinstance(self,Vec2D) and isinstance(other,Vec2D):
+            dot_prod = (self.x * other.x) + (self.y * other.y)
+            return dot_prod
+        elif isinstance(other,Point):
+            dot_prod = (self.x * other.x) + (self.y * other.y)
+            return dot_prod
+        elif isinstance(other,int):
+            newX = self.x * other
+            newY = self.y * other
+            return Vec2D(newX,newY)
+    def norm(self):
+        magnitude = float(math.sqrt(self.x**2 + self.y**2))
+        return magnitude
+        
         
     pass
 
-if __name__=='__main__':
 
-    pass
+if __name__=='__main__':
+    num2 = 3
 
