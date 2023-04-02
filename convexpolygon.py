@@ -102,4 +102,11 @@ class ConvexPolygon:
     
    
 if __name__=='__main__':
+a = ngon([P(1,0), P(0,1), P(-1,0), P(0,-1)]) 
+print("Before rotation\n")
+print(a)
+
+print("\nAfter rotation\n")
+a.rotate(math.pi/4.0)
+print(a)
     pass
