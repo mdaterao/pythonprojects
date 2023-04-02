@@ -102,6 +102,13 @@ class ConvexPolygon:
     
    
 if __name__=='__main__':
+import math
+from convexpolygon import ConvexPolygon as ngon
+from vec2d import Point as P
+from vec2d import Vec2D as V
+# ngon is an alias for ConvexPolygon
+# P is an alias for Point
+# V is an alias for Vec2D
 a = ngon([P(1,0), P(0,1), P(-1,0), P(0,-1)]) 
 print("Before rotation\n")
 print(a)
