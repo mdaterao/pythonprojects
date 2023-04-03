@@ -1,3 +1,4 @@
+
 from vec2d import Point
 from vec2d import Vec2D
 
@@ -57,7 +58,7 @@ class ConvexPolygon:
         self.edges = []
         for i in range(len(points)-1):
             self.edges.append(points[i+1] - points[i])
-        self.edges.append(points[-1]-points[0])
+        self.edges.append(points[0]-points[-1])
         for i in points:
             self.nverts += 1
             self.verts.append(i)
@@ -67,53 +68,83 @@ class ConvexPolygon:
             i.x = i.x + other.x
             i.y = i.y + other.y
     
-    def rotate(self, angle, point=0):
-        a_sum = 0
-        for i in range(self.nverts-1):
-            a_sum += (self.verts[i].x * self.verts[i+1].y) - (self.verts[i+1].x * self.verts[i].y)
-            print(self.verts[i], self.verts[i+1], a_sum)
-        a = (1/2) * a_sum
-        
-        cx_sum = 0
-        for i in range(self.nverts-1):
-            cx_sum += (self.verts[i].x + self.verts[i+1].x) * ((self.verts[i].x * self.verts[i+1].y) - (self.verts[i+1].x * self.verts[i].y))
-        cx = (1 / (6 * a)) * cx_sum
-        
-        cy_sum = 0
-        for i in range(self.nverts-1):
-            cy_sum += (self.verts[i].y + self.verts[i+1].y) * ((self.verts[i].x * self.verts[i+1].y) - (self.verts[i+1].x * self.verts[i].y))
-        cy = (1 / (6 * a)) * cy_sum
+    def rotate(self, angle, point = None):
+        x_sum = 0
+        y_sum = 0
+        for i in self.verts:
+            x_sum += i.x
+            y_sum += i.y
+        cx = x_sum / self.nverts
+        cy = y_sum / self.nverts
         
         centroid = Point(cx,cy)
-        if point == 0:
+        
+        if point == None:
             point = centroid
         
         for i in self.verts:
-            i.x = round(((math.cos(angle) * (i.x - point.x)) - (math.sin(angle) * (i.y - point.y)) + point.x), 4)
-            i.y = round(((math.sin(angle) * (i.x - point.x)) - (math.cos(angle) * (i.y - point.y)) + point.y), 4)
+            temp_x = i.x
+            i.x = (math.cos(angle) * (i.x - point.x)) - (math.sin(angle) * (i.y - point.y)) + point.x
+            i.y = (math.sin(angle) * (temp_x - point.x)) + (math.cos(angle) * (i.y - point.y)) + point.y
+       
+        new_edges = []
+        for i in range(len(self.verts)-1):
+            edge = self.verts[i+1] - self.verts[i]
+            new_edges.append(edge)
+        new_edges.append(self.verts[0] - self.verts[-1])
+        self.edges = new_edges
         
-        
+    def scale(self, sx, sy):
+        try:
+            if sx < 0 or sy < 0:
+                raise ValueError('scale must be positive')
+            x_sum = 0
+            y_sum = 0
+            for i in self.verts:
+                x_sum += i.x
+                y_sum += i.y
+            cx = x_sum / self.nverts
+            cy = y_sum / self.nverts
             
+            
+            for i in self.verts:
+                i.x = float(sx * (i.x - cx) + cx)
+                i.y = float(sy * (i.y - cy) + cy)
+            
+            new_edges = []
+            for i in range(len(self.verts)-1):
+                edge = self.verts[i+1] - self.verts[i]
+                new_edges.append(edge)
+            new_edges.append(self.verts[0] - self.verts[-1])
+            self.edges = new_edges
+       
+        except ValueError as excpt:
+            print(excpt)
+            print('scale must be positive')
     
-        
-        
+    def __and__(self,other):
+        E = []
+        for i in self.edges:
+            E.append(i)
+        for i in other.edges:
+            E.append(i)
+        n = len(self.edges)
+        m = len(other.edges)
+        for i in range (n + m):
+            edge = E[i]
+            orthogonal = Vec2D(-edge.y,edge.x)
+            proj_A = [Vec2D(vertex) * orthogonal for vertex in self.verts]
+            proj_B= [Vec2D(vertex) * orthogonal for vertex in other.verts]
+            minA = min(proj_A)
+            maxA = max(proj_A)
+            minB = min(proj_B)
+            maxB = max(proj_B)
+            if maxA < minB or maxB < minA:
+                return False
+        return True
+            
+            
         
     
-    
-   
 if __name__=='__main__':
-import math
-from convexpolygon import ConvexPolygon as ngon
-from vec2d import Point as P
-from vec2d import Vec2D as V
-# ngon is an alias for ConvexPolygon
-# P is an alias for Point
-# V is an alias for Vec2D
-a = ngon([P(1,0), P(0,1), P(-1,0), P(0,-1)]) 
-print("Before rotation\n")
-print(a)
-
-print("\nAfter rotation\n")
-a.rotate(math.pi/4.0)
-print(a)
     pass
