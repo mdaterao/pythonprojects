@@ -1,4 +1,3 @@
-
 from vec2d import Point
 from vec2d import Vec2D
 
@@ -39,12 +38,27 @@ def orient2d(a, b, c):
 
 class ConvexPolygon:
 
-    ''' Convex Polygon class definition'''
+    ''' Convex Polygon class definition:
+        
+        Create and modify convex polygon objects
+    
+    '''
     
 
 
     
     def __str__(self):
+        '''
+        prints the number of vertices (self.nverts) attribute
+        prints the vertices (self.verts) atribute 
+        prints the edges (self.edges) attribute
+
+        Returns
+        -------
+        TYPE, str
+            DESCRIPTION.
+
+        '''
 
         nv = 'No. of Vertices: '+str(self.nverts)+'\n'
         vs = "Vertices "+" ".join([v.__str__() + ', ' for v in self.verts]) + '\n'
@@ -53,6 +67,23 @@ class ConvexPolygon:
 
     
     def __init__(self,points):
+        '''
+        Initializes a polygon and its attributes: self.nverts,
+        self.verts, and self.edges
+        
+        accepts a list of Point objects as an argument and initializes 
+        a ConvexPolygon object
+
+        Parameters
+        ----------
+        points : TYPE, list
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        '''
         self.nverts = 0
         self.verts = []
         self.edges = []
@@ -64,11 +95,33 @@ class ConvexPolygon:
             self.verts.append(i)
         
     def translate(self,other):
+        '''
+        translates a polygon in the direction of a vector
+
+        Parameters
+        ----------
+        other : TYPE, vec2D object
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        '''
         for i in self.verts:
             i.x = i.x + other.x
             i.y = i.y + other.y
     
-    def rotate(self, angle, point = None):
+    def centroid(self):
+        '''
+        determines the centroid of a polygon
+
+        Returns
+        -------
+        centroid : TYPE, Point object
+            DESCRIPTION.
+
+        '''
         x_sum = 0
         y_sum = 0
         for i in self.verts:
@@ -76,8 +129,51 @@ class ConvexPolygon:
             y_sum += i.y
         cx = x_sum / self.nverts
         cy = y_sum / self.nverts
-        
         centroid = Point(cx,cy)
+        return centroid
+    
+    def edges(self):
+        '''
+        updates the self.edges attribute when the vertices
+        of a polygon have changed
+
+        Returns
+        -------
+        None.
+
+        '''
+        new_edges = []
+        for i in range(len(self.verts)-1):
+            edge = self.verts[i+1] - self.verts[i]
+            new_edges.append(edge)
+        new_edges.append(self.verts[0] - self.verts[-1])
+        self.edges = new_edges
+    
+    def rotate(self, angle, point = None):
+        '''
+        rotates a polygon in the counter-clockwise direction
+        about a pivot point
+        
+        If the method is called without the (optional) pivot 
+        point argument the centroid of the polygon must be set 
+        as the pivot point
+        
+        The rotate method updates the edges and vertices of the 
+        polygon upon rotation
+
+        Parameters
+        ----------
+        angle : TYPE, float
+            DESCRIPTION.
+        point : TYPE, optional, Point object
+            DESCRIPTION. The default is None.
+
+        Returns
+        -------
+        None.
+
+        '''
+        centroid = ConvexPolygon.centroid(self)
         
         if point == None:
             point = centroid
@@ -87,42 +183,70 @@ class ConvexPolygon:
             i.x = (math.cos(angle) * (i.x - point.x)) - (math.sin(angle) * (i.y - point.y)) + point.x
             i.y = (math.sin(angle) * (temp_x - point.x)) + (math.cos(angle) * (i.y - point.y)) + point.y
        
-        new_edges = []
-        for i in range(len(self.verts)-1):
-            edge = self.verts[i+1] - self.verts[i]
-            new_edges.append(edge)
-        new_edges.append(self.verts[0] - self.verts[-1])
-        self.edges = new_edges
+        ConvexPolygon.edges(self)
         
     def scale(self, sx, sy):
+        '''
+        rescales a polygon
+        The method must accept two positive float objects
+        to scale the polygon by scale factors sx and sy
+        
+        updates edges and vertices of the polygon after it
+        is scaled
+
+        Parameters
+        ----------
+        sx : TYPE, float
+            DESCRIPTION.
+        sy : TYPE, float
+            DESCRIPTION.
+
+        Raises
+        ------
+        ValueError
+            DESCRIPTION.
+            The scale factors must be positive floats
+
+        Returns
+        -------
+        None.
+
+        '''
         try:
             if sx < 0 or sy < 0:
-                raise ValueError('scale must be positive')
-            x_sum = 0
-            y_sum = 0
-            for i in self.verts:
-                x_sum += i.x
-                y_sum += i.y
-            cx = x_sum / self.nverts
-            cy = y_sum / self.nverts
-            
+                raise ValueError('scale factors must be positive')
+            centroid = ConvexPolygon.centroid(self)
             
             for i in self.verts:
-                i.x = float(sx * (i.x - cx) + cx)
-                i.y = float(sy * (i.y - cy) + cy)
+                i.x = float(sx * (i.x - centroid.x) + centroid.x)
+                i.y = float(sy * (i.y - centroid.y) + centroid.y)
             
-            new_edges = []
-            for i in range(len(self.verts)-1):
-                edge = self.verts[i+1] - self.verts[i]
-                new_edges.append(edge)
-            new_edges.append(self.verts[0] - self.verts[-1])
-            self.edges = new_edges
+            ConvexPolygon.edges(self)
        
         except ValueError as excpt:
             print(excpt)
             print('scale must be positive')
     
+    
     def __and__(self,other):
+        '''
+        checks overlaps between polygons
+        returns the boolean object True if two polygons 
+        overlap and False otherwise
+        
+        overloads the & operator
+
+        Parameters
+        ----------
+        other : TYPE, ConvexPolygon object
+            DESCRIPTION.
+
+        Returns
+        -------
+        bool
+            DESCRIPTION.
+
+        '''
         E = []
         for i in self.edges:
             E.append(i)
@@ -132,9 +256,9 @@ class ConvexPolygon:
         m = len(other.edges)
         for i in range (n + m):
             edge = E[i]
-            orthogonal = Vec2D(-edge.y,edge.x)
-            proj_A = [Vec2D(vertex) * orthogonal for vertex in self.verts]
-            proj_B= [Vec2D(vertex) * orthogonal for vertex in other.verts]
+            ortho = Vec2D(-edge.y,edge.x)
+            proj_A = [Vec2D(vert) * ortho for vert in self.verts]
+            proj_B= [Vec2D(vert) * ortho for vert in other.verts]
             minA = min(proj_A)
             maxA = max(proj_A)
             minB = min(proj_B)
