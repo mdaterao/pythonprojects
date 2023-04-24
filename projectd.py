@@ -240,16 +240,28 @@ def summarizedata(filename):
     
     # Read in data from the Harvard Forest
     '''your code'''
+    data = np.genfromtxt(filename, delimiter=',', skip_header=1)
+    year = data[:,0]
+    co2_flux = data[:,3]
     
+        
     # Create a time series plot of the data
     '''your code'''
+    plt.scatter(year, co2_flux, s=5)
+    plt.xlabel('Date')
+    plt.ylabel('CO2 flux')
+    plt.title('Time series of model fit')
 
     # Display the plot
     plt.show()
-
+    
      # Plot a histogram of the data
     '''your code'''
-
+    plt.hist(co2_flux, bins=20, density=True)
+    plt.xlabel('CO2 flux')
+    plt.title('Histogram of CO2 flux')
+    
+    
     # Display the plot
     plt.show()
  
