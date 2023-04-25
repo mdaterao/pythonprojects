@@ -15,7 +15,7 @@
 
 import csv
 import math
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -233,7 +233,6 @@ def data_stats(filename):
 #----------#
 
 def summarizedata(filename):
-    
     # Purpose:
     #	Create a plot of the CO2 data as a time series
     #	Plot a histogram of the data
@@ -278,14 +277,32 @@ def seasonalcycle(filename):
 
     # Read in the data from the Harvard Forest
     '''your code'''
+    # Load data from CSV file
+    data = np.genfromtxt(filename, delimiter=',', skip_header=1)
 
-    # Loop over each month
-    
-    # Plot the average flux by month
-    '''your code'''
+    # Extract month columns
+    month = data[:, 1]
 
-    # Return the result
+    # Extract CO2 flux column
+    flux = data[:, 3]
+
+    # Calculate average flux by month of year
     
+    monthly_means = np.zeros(12)
+    for m in range(1, 13):
+        mask = (month == m)
+        monthly_means[m-1] = np.mean(flux[mask])
+
+    # Plot the seasonal cycle
+    months = np.arange(1, 13)
+    plt.plot(months, monthly_means)
+    plt.xlabel('Month')
+    plt.ylabel('Average CO2 Flux (umol/m2/s)')
+    plt.title('Seasonal Cycle of CO2 Flux')
+    plt.show()
+
+    # Return the monthly means
+    return monthly_means
     pass
 
 
@@ -301,12 +318,23 @@ def HFregression(filename):
 
     # Read in the data from the Harvard Forest
     '''your code'''
+    data = np.genfromtxt(filename, delimiter=',', skip_header=1)
 
     # Create the X matrix for the regression
     '''your code'''
+    pre_X = data[:, 4:]
+    num_rows = pre_X.shape[0]
+    ones_array = np.ones((num_rows, 1))
+    X = np.concatenate((ones_array, pre_X), axis=1)
+    z = data[:, 3]
     
     # Estimate the regression coefficients
     '''your code'''
+    X_T = np.transpose(X)
+    X_T_X = np.dot(X_T, X)
+    X_T_X_inv = np.linalg.inv(X_T_X)
+    first_dot_prod = np.dot(X_T_X_inv, X_T)
+    beta = np.dot(first_dot_prod, z)
     
     # Create the model estimate
     '''your code'''
@@ -329,9 +357,10 @@ def HFregression(filename):
     # Plot the model estimate for 2023 data
     
     # Display the plot
-    plt.show()
+    #plt.show()
 
     # Return the regression coefficients 
+    return beta
     
     pass
 
