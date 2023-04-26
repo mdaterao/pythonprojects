@@ -310,8 +310,8 @@ def seasonalcycle(filename):
 # PART G	                  #
 #---------------------------#
 
-def HFregression(filename):
-	
+def HFregression(filename, filename2):
+    fig, axs = plt.subplots(3, 1, figsize=(10, 15))
     # Purpose: 
         #    Create a regression model for CO2 fluxes
         #    Visualize the outputs of the model
@@ -340,18 +340,18 @@ def HFregression(filename):
     '''your code'''
     X_B = np.dot(X, beta)
     
-    year = data[:,0]
+    date = data[:,0] + data[:,1] / 12
     co2_flux = data[:,3]
-    plt.plot(year, co2_flux, color='blue', label='Data')
-    plt.xticks([1992.5,1995.0, 1997.5, 2000.0, 2002.5, 2005.0, 2007.5, 2010.0])
-    plt.yticks([-10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0])
-    plt.xlabel('Date')
-    plt.ylabel('CO2 flux')
-    plt.title('Time series of model fit')
+    axs[0].plot(date, co2_flux, color='blue', label='Data')
+    axs[0].set_xticks([1992.5,1995.0, 1997.5, 2000.0, 2002.5, 2005.0, 2007.5, 2010.0])
+    axs[0].set_yticks([-10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0])
+    axs[0].set_xlabel('Date')
+    axs[0].set_ylabel('CO2 flux')
+    axs[0].set_title('Time series of model fit')
     
     
     # Plot the model estimate
-    plt.plot(year, X_B,  color='orange', label='Model')
+    axs[0].plot(date, X_B,  color='orange', label='Model')
     
     
     # Calculate the correlation coefficient
@@ -359,9 +359,9 @@ def HFregression(filename):
     r = r[1,0]
     
     # Add the correlation coefficient to the plot
-    plt.text(1995.0, 5.0, 'r= {:.2f}'.format(r))
-    plt.legend()
-    plt.show()
+    axs[0].text(1995.0, 5.0, 'r= {:.2f}'.format(r))
+    axs[0].legend()
+ 
 
     # Create a plot of the model components
     '''your code'''
@@ -376,50 +376,51 @@ def HFregression(filename):
     
     
     
-    plt.plot(year, intercept, label='intercept')
+    axs[1].plot(date, intercept, label='intercept')
+    axs[1].plot(date, net_radiation, label='net radiation')
+    axs[1].plot(date, air_temp, label='air temperature')
+    axs[1].plot(date, water_vapor, label='water vapor')
+    axs[1].plot(date, wind_speed, label='wind speed')
     
-    plt.plot(year, net_radiation, label='net radiation')
-    plt.plot(year, air_temp, label='air temperature')
-    plt.plot(year, water_vapor, label='water vapor')
-    plt.plot(year, wind_speed, label='wind speed')
+    axs[1].set_xticks([1992.5,1995.0, 1997.5, 2000.0, 2002.5, 2005.0, 2007.5, 2010.0])
+    axs[1].set_yticks([-6, -4, -2, 0])
     
-    plt.xticks([1992.5,1995.0, 1997.5, 2000.0, 2002.5, 2005.0, 2007.5, 2010.0])
-    plt.yticks([-6, -4, -2, 0])
+    axs[1].set_xlabel('Date')
+    axs[1].set_ylabel('CO2 flux')
+    axs[1].set_title('Contribution of different model components')
     
-    plt.xlabel('Date')
-    plt.ylabel('CO2 flux')
-    plt.title('Contribution of different model components')
+    axs[1].legend()
     
-    plt.legend()
-    
-    plt.show()
+  
     
     
     # Load 2023 data and create X matrix for regression
-    recent_data = np.genfromtxt('harvard_forest_2023.csv', delimiter=',', skip_header=1)
+    recent_data = np.genfromtxt(filename2, delimiter=',', skip_header=1)
     recent_pre_X = recent_data[:, 4:]
     recent_num_rows = recent_pre_X.shape[0]
     ones_array = np.ones((recent_num_rows, 1))
     recent_X = np.concatenate((ones_array, recent_pre_X), axis=1)
     
     # Create the model estimate for 2023 data
-    recent_days= recent_data[:,2]
+    recent_days= recent_data[:,2] / 365
     recent_co2_flux = recent_data[:,3]
     
     recent_X_B = np.dot(recent_X, beta)
     
     # Plot the model estimate for 2023 data
-    plt.plot(recent_days, recent_co2_flux, label='de-calibrated model')
-    plt.plot(recent_days, recent_X_B, label='Model')
-    plt.yticks([-0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5])
-    plt.xlabel('Date (day in 2023)')
-    plt.ylabel('CO2 flux')
-    plt.title('Time series of model fit for 2023 data')
-    plt.legend()
+    axs[2].plot(recent_days, recent_co2_flux, label='de-calibrated model')
+    axs[2].plot(recent_days, recent_X_B, label='Model')
+    axs[2].set_yticks([-0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5])
+    axs[2].set_xlabel('Date')
+    axs[2].set_ylabel('CO2 flux')
+    axs[2].set_title('Time series of model fit for 2023 data')
+    axs[2].legend()
     
-    decalibrated_error_matrix = (recent_co2_flux - recent_X_B) / len(recent_co2_flux)
-    decalibrated_error = decalibrated_error_matrix[0]
-    print(f'Eddy flux instrument was de-calibrated by {decalibrated_error} units')
+    eddy_flux_sum = 0
+    for i in range(len(recent_data[:,3])):
+        eddy_flux_sum += recent_X_B[i] - recent_co2_flux[i]
+    decalibrated_error = (-eddy_flux_sum / len(recent_data[:,3]))
+    print(f'Eddy flux instrument was de-calibrated by {decalibrated_error:.2f} units.')
     # Display the plot
     plt.show()
 
